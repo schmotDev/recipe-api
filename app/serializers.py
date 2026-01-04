@@ -17,5 +17,5 @@ class RecipeRatingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
 
-    def rien_du_tout(self):
+    def rien_du_tout2(self):
         pass
