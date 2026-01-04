@@ -47,3 +47,10 @@ jobs:
             pytest.xml
           show-diffcover: 'true'
 
+      - name: Review agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: poetry run python agent.py $GITHUB_TOKEN $REPOSITORY $PR_NUMBER $OPENROUTER_API_KEY
