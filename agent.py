@@ -117,9 +117,9 @@ def create_commit_details_tool(repo):
 
 def create_save_context_tool():
     async def save_context(ctx: Context, context_summary: str) -> str:
-        current_state = getattr(ctx, "state", {})
+        current_state = ctx.store.get("state")
         current_state["context"] = context_summary
-        await ctx.set_state(current_state)
+        await ctx.store.set("state", current_state)
         return "Context saved to state."
 
     return FunctionTool.from_defaults(
@@ -130,9 +130,9 @@ def create_save_context_tool():
 
 def create_save_draft_comment_tool():
     async def save_draft_comment(ctx: Context, draft_comment: str) -> str:
-        current_state = getattr(ctx, "state", {})
+        current_state = ctx.store.get("state")
         current_state["draft_comment"] = draft_comment
-        await ctx.set_state(current_state)
+        await ctx.store.set("state", current_state)
         return "Draft comment saved to state."
 
     return FunctionTool.from_defaults(
@@ -143,9 +143,9 @@ def create_save_draft_comment_tool():
 
 def create_save_final_review_tool():
     async def save_final_review(ctx: Context, final_review: str):
-        current_state = getattr(ctx, "state", {})
+        current_state = ctx.store.get("state")
         current_state["final_review"] = final_review
-        await ctx.set_state(current_state)
+        await ctx.store.set("state", current_state)
         return {"status": "saved"}
 
     return FunctionTool.from_defaults(
