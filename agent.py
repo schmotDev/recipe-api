@@ -142,7 +142,7 @@ def create_save_draft_comment_tool():
     )
 
 def create_save_final_review_tool():
-    async def save_final_review(final_review: str, ctx):
+    async def save_final_review(ctx: Context, final_review: str):
         current_state = await ctx.get("state") or {}
         current_state["final_review"] = final_review
         await ctx.set("state", current_state)
