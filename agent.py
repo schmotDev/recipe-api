@@ -22,6 +22,8 @@ llm = OpenAI(
     temperature=0
 )
 
+repo_url = "https://github.com/schmotDev/recipe-api.git"
+
 full_repo_name = os.getenv("REPOSITORY")
 pr_number = os.getenv("PR_NUMBER")
 
