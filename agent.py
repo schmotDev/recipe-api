@@ -157,7 +157,7 @@ def create_save_final_review_tool():
 def create_post_review_tool(repo):
     def post_review(pr_number: int, comment: str) -> dict:
         pr = repo.get_pull(pr_number)
-        pr.create_review(body=comment)  # only body is needed
+        pr.create_review(body=comment, event="COMMENT")
         return {"status": "posted", "pr_number": pr_number}
 
     return FunctionTool.from_defaults(
