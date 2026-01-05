@@ -228,6 +228,7 @@ Ensure to do the following for a thorough review:
  "Thanks for fixing this. I think all places where we call quote should be fixed. Can you roll this fix out everywhere?"
  After drafting the review comment:
  
+ 
 
 - Do NOT return the review as a final response.
 - Do NOT end the workflow.
@@ -272,6 +273,7 @@ Once a review is generated, you need to run a final check and post it to GitHub.
    - Are there suggestions on which lines could be improved upon? Are these lines quoted? \n
  If the review does not meet this criteria, you must ask the CommentorAgent to rewrite and address these concerns. \n
  When you are satisfied, post the review to GitHub.  
+  Make sure a comment is posted on github, don't hand off to CommentorAgent if not needed.
 """
 
 def create_review_and_posting_agent(tools, llm, system_prompt) -> FunctionAgent:
