@@ -119,6 +119,7 @@ def create_save_context_tool():
     async def save_context(ctx: Context, context_summary: str) -> str:
         current_state = await ctx.get("state") or {}
         current_state["context"] = context_summary
+        current_state["pr_number"] = context_summary.get("pr_number")
         await ctx.set("state", current_state)
         return "Context saved to state."
 
