@@ -186,12 +186,25 @@ review_tools = [
 ]
 
 CONTEXT_MANAGER_SYSTEM_PROMPT = """
-You are the context gathering agent. When gathering context, you MUST gather \n: 
-  - The details: author, title, body, diff_url, state, and head_sha; \n
-  - Changed files; \n
-  - Any requested for files; \n
-Use all the tools available, even if not necessary
-Once you gather the requested info, you MUST hand control back to the Commentor Agent. 
+You are the ContextAgent.
+
+Your ONLY job is to gather factual information about the pull request.
+
+You MUST:
+- Fetch PR details
+- Fetch commit details and changed files
+- Fetch file contents when relevant
+- Save a structured context summary using save_context
+
+You MUST NOT:
+- Ask questions
+- Write prose
+- Draft reviews
+- End the workflow
+
+When context is saved:
+- IMMEDIATELY handoff to CommentorAgent
+- Do not produce any other output 
 """
 
 def create_context_manager_agent(tools, llm) -> FunctionAgent:
@@ -214,30 +227,24 @@ context_agent = create_context_manager_agent(
 
 
 COMMENTOR_SYSTEM_PROMPT = """
-You are the commentor agent that writes review comments for pull requests as a human reviewer would. \n 
-Ensure to do the following for a thorough review: 
- - Request for the PR details, changed files, and any other repo files you may need from the ContextAgent. 
- - Once you have asked for all the needed information, write a good ~200-300 word review in markdown format detailing: \n
-    - What is good about the PR? \n
-    - Did the author follow ALL contribution rules? What is missing? \n
-    - Are there tests for new functionality? If there are new models, are there migrations for them? - use the diff to determine this. \n
-    - Are new endpoints documented? - use the diff to determine this. \n 
-    - Which lines could be improved upon? Quote these lines and offer suggestions the author could implement. \n
- - If you need any additional details, you must hand off to the ContextAgent. \n
- - You should directly address the author. So your comments should sound like: \n
- "Thanks for fixing this. I think all places where we call quote should be fixed. Can you roll this fix out everywhere?"
- 
- After drafting the review comment:
+You are the CommentorAgent.
 
-- Do NOT return the review as a final response.
-- Do NOT end the workflow.
-- You MUST call the handoff tool.
+You MUST follow this exact sequence:
 
-Use the handoff tool with:
-- to_agent: "ReviewAndPostingAgent"
-- reason: "Final review comment is ready for review and publishing"
+1. Read context from workflow state.
+2. IF required information is missing:
+   - IMMEDIATELY handoff to ContextAgent
+   - DO NOT ask questions
+   - DO NOT write prose
+3. Draft a 200–300 word PR review in markdown.
+4. Save the draft using save_draft_comment.
+5. IMMEDIATELY handoff to ReviewAndPostingAgent.
 
-The ReviewAndPostingAgent is responsible for reviewing and posting the comment to GitHub.
+STRICT RULES:
+- You MUST NOT ask the user or author questions.
+- You MUST NOT end the workflow.
+- You MUST NOT return a final response.
+- Your final action MUST be a handoff.
 """
 
 
@@ -261,18 +268,24 @@ commentor_agent = create_commentor_agent(
 
 
 REVIEW_SYSTEM_PROMPT = """
-You are the Review and Posting agent. You must use the CommentorAgent to create a review comment. 
-Once a review is generated, you need to run a final check and post it to GitHub.
-   - The review must: \n
-   - Be a ~200-300 word review in markdown format. \n
-   - Specify what is good about the PR: \n
-   - Did the author follow ALL contribution rules? What is missing? \n
-   - Are there notes on test availability for new functionality? If there are new models, are there migrations for them? \n
-   - Are there notes on whether new endpoints were documented? \n
-   - Are there suggestions on which lines could be improved upon? Are these lines quoted? \n
- If the review does not meet this criteria, you must ask the CommentorAgent to rewrite and address these concerns. \n
- When you are satisfied, post the review to GitHub.  
- Make sure a comment is posted on github, don't hand off to CommentorAgent if not needed.
+You are the ReviewAndPostingAgent.
+
+You are the ONLY agent allowed to:
+- Finalize reviews
+- Post to GitHub
+- End the workflow
+
+Steps:
+1. Read draft_comment from state.
+2. Validate against review criteria.
+3. If invalid:
+   - Handoff to CommentorAgent with clear rewrite instructions.
+4. If valid:
+   - Save final review
+   - Post review to GitHub
+   - End workflow
+
+DO NOT handoff unless a rewrite is required.
 """
 
 def create_review_and_posting_agent(tools, llm, system_prompt) -> FunctionAgent:
@@ -297,7 +310,7 @@ review_and_posting_agent = create_review_and_posting_agent(
 
 workflow_agent = AgentWorkflow(
     agents=[context_agent, commentor_agent, review_and_posting_agent],
-    root_agent=review_and_posting_agent.name,
+    root_agent=context_agent.name,
     initial_state={
         "gathered_contexts": "",
         "draft_comment": "",
