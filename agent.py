@@ -222,10 +222,21 @@ Ensure to do the following for a thorough review:
     - Are there tests for new functionality? If there are new models, are there migrations for them? - use the diff to determine this. \n
     - Are new endpoints documented? - use the diff to determine this. \n 
     - Which lines could be improved upon? Quote these lines and offer suggestions the author could implement. \n
- - If you need any additional details, you must hand off to the Commentor Agent. \n
+ - If you need any additional details, you must hand off to the ContextAgent. \n
  - You should directly address the author. So your comments should sound like: \n
  "Thanks for fixing this. I think all places where we call quote should be fixed. Can you roll this fix out everywhere?"
- - You must hand off to the ReviewAndPostingAgent once you are done drafting a review.
+
+After drafting the review comment:
+
+- Do NOT return the review as a final response.
+- Do NOT end the workflow.
+- You MUST call the handoff tool.
+
+Use the handoff tool with:
+- to_agent: "ReviewAndPostingAgent"
+- reason: "Final review comment is ready for review and publishing"
+
+The ReviewAndPostingAgent is responsible for reviewing and posting the comment to GitHub.
 """
 
 
