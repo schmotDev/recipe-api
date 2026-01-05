@@ -260,7 +260,7 @@ Once a review is generated, you need to run a final check and post it to GitHub.
    - Are there notes on whether new endpoints were documented? \n
    - Are there suggestions on which lines could be improved upon? Are these lines quoted? \n
  If the review does not meet this criteria, you must ask the CommentorAgent to rewrite and address these concerns. \n
- When you are satisfied, post the review to GitHub.  
+ When you are satisfied, post the review to GitHub.  Make sure a comment is posted.
 """
 
 def create_review_and_posting_agent(tools, llm, system_prompt) -> FunctionAgent:
