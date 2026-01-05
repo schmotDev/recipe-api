@@ -22,13 +22,13 @@ llm = OpenAI(
     temperature=0
 )
 
-repo_url = "https://github.com/schmotDev/recipe-api.git"
-
-full_repo_name = os.getenv("REPOSITORY")
-pr_number = os.getenv("PR_NUMBER")
-
 auth = Token(os.getenv("GITHUB_TOKEN"))
 git = Github(auth=auth)
+
+
+github_client = Github(os.getenv("GITHUB_TOKEN")) if os.getenv("GITHUB_TOKEN") else Github()
+full_repo_name = os.getenv("REPOSITORY")
+pr_number = os.getenv("PR_NUMBER")
 
 
 if git is not None:
@@ -294,7 +294,7 @@ workflow_agent = AgentWorkflow(
 
 
 async def main():
-    query = "Write a review for PR: " + pr_number
+    query = query = "Write a review for PR: " + pr_number
     prompt = RichPromptTemplate(query)
 
     handler = workflow_agent.run(prompt.format())
@@ -316,5 +316,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    git.close()
     git.close()
